@@ -2,6 +2,16 @@ const request = require('supertest');
 const server = require('../api/server');
 const db = require('../database/dbConfig');
 
+/* 
+first test = jest test and env test
+Second test = register - if username exists afer creatiopn 
+                    - if status is 201 Created
+Third test = login - if status is 200 OK
+                    - if token exists and is longer than 12 char
+Fouth within third = DATA - if authenticated returns an array
+                            - if status is 200 OK 
+*/
+
 describe('server', () => {
   beforeEach(async () => {
     await db('users').truncate();
@@ -38,7 +48,7 @@ describe('server', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    it('Should create user, then login', async () => {
+    it('Should create user, then login, show jokes', async () => {
       const user = {
         username: 'PattyWack',
         password: 'PistolPeet21'
@@ -53,6 +63,7 @@ describe('server', () => {
         username: 'PattyWack',
         password: 'PistolPeet21'
       };
+      // login
       res = await request(server)
         .post('/api/auth/login')
         .send(user_login);
@@ -60,6 +71,12 @@ describe('server', () => {
       // handle the token
       const token = res.body.token;
       expect(token.length).toBeGreaterThan(12);
+      // access jokes
+      res = await request(server)
+        .get('/api/jokes')
+        .set({ authorization: token, Accept: 'application/json' });
+      expect(res.body).toBeInstanceOf(Array);
+      expect(res.status).toBe(200);
     });
   });
 });
