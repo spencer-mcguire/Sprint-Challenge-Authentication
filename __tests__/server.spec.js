@@ -36,4 +36,30 @@ describe('server', () => {
         .expect('Content-Type', /json/);
     });
   });
+
+  describe('POST /api/auth/login', () => {
+    it('Should create user, then login', async () => {
+      const user = {
+        username: 'PattyWack',
+        password: 'PistolPeet21'
+      };
+      // register a new user
+      let res = await request(server)
+        .post('/api/auth/register')
+        .send(user);
+      expect(res.status).toEqual(201);
+      // new user logs in
+      const user_login = {
+        username: 'PattyWack',
+        password: 'PistolPeet21'
+      };
+      res = await request(server)
+        .post('/api/auth/login')
+        .send(user_login);
+      expect(res.status).toEqual(200);
+      // handle the token
+      const token = res.body.token;
+      expect(token.length).toBeGreaterThan(12);
+    });
+  });
 });
